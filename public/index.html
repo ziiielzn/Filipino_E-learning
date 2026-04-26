@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>E-WIKOM </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: #0f172a; }
+
+        /* Login Section */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f2c44, #1e4a76);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .login-card {
+            background: white;
+            border-radius: 2rem;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .login-card h1 { font-size: 2rem; color: #1e4a76; margin-bottom: 0.5rem; }
+        .input-field { margin-bottom: 1.2rem; text-align: left; }
+        .input-field label { font-weight: 600; display: block; margin-bottom: 0.4rem; font-size: 0.9rem; }
+        .input-field input { width: 100%; padding: 0.9rem 1rem; border: 2px solid #e2e8f0; border-radius: 1rem; font-size: 1rem; transition: all 0.2s; }
+        .input-field input:focus { border-color: #f59e0b; outline: none; }
+        .login-btn { width: 100%; padding: 0.9rem; background: #1e4a76; color: white; border: none; border-radius: 1rem; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
+        .login-btn:hover { background: #e67e22; transform: translateY(-2px); }
+        .switch-auth { margin-top: 1rem; font-size: 0.9rem; }
+        .error-msg { color: #dc2626; font-size: 0.8rem; margin-top: 0.5rem; }
+
+        /* Main App */
+        .app-container { display: none; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: #0f172a;
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+        }
+        .sidebar-header { padding: 1.8rem; border-bottom: 1px solid #1e293b; }
+        .sidebar-header h2 { font-size: 1.8rem; display: flex; align-items: center; gap: 12px; }
+        .user-info-sidebar { 
+            background: #1e293b; 
+            margin: 1.2rem; 
+            border-radius: 1.2rem; 
+            padding: 1rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 14px;
+        }
+        .user-avatar { 
+            width: 50px; 
+            height: 50px; 
+            background: #f59e0b; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+        .user-details h4 { font-size: 1.1rem; margin-bottom: 0.2rem; }
+        .user-details p { font-size: 0.8rem; opacity: 0.8; }
+        .nav-menu { padding: 0 1rem; }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 1rem 1.2rem;
+            margin: 0.5rem 0;
+            border-radius: 1rem;
+            cursor: pointer;
+            color: #cbd5e1;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-item:hover, .nav-item.active { background: #1e4a76; color: white; }
+        .nav-item i { width: 26px; font-size: 1.2rem; }
+        .logout-sidebar { margin-top: 2rem; border-top: 1px solid #1e293b; padding-top: 1rem; }
+
+        /* Main Content */
+        .main-content { margin-left: 300px; padding: 1.8rem 2.2rem; min-height: 100vh; }
+        .top-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 2rem; 
+            flex-wrap: wrap; 
+            gap: 1rem;
+            background: white;
+            padding: 1rem 1.8rem;
+            border-radius: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .page-title { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #1e4a76, #2d6a9f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .logout-btn-header {
+            background: #ef4444;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 2rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .logout-btn-header:hover { background: #dc2626; transform: translateY(-2px); }
+
+        /* Module Cards */
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.8rem; margin-top: 1rem; }
+        .module-card { background: white; border-radius: 1.5rem; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; }
+        .module-card:hover { transform: translateY(-6px); box-shadow: 0 15px 30px rgba(0,0,0,0.12); }
+        .module-card.locked { opacity: 0.6; filter: grayscale(0.1); pointer-events: none; }
+        .module-header { background: linear-gradient(135deg, #1e4a76, #256a9e); padding: 1.2rem 1.5rem; color: white; }
+        .module-header h3 { font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+        .module-header p { font-size: 0.85rem; opacity: 0.9; margin-top: 0.3rem; }
+        .module-body { padding: 1.3rem; }
+        .module-status { display: inline-block; padding: 0.3rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.8rem; }
+        .status-completed { background: #22c55e; color: white; }
+        .status-pending { background: #f59e0b; color: white; }
+        .status-locked { background: #64748b; color: white; }
+        .module-time { font-size: 0.8rem; color: #64748b; margin: 0.6rem 0; }
+        .module-btn { width: 100%; padding: 0.8rem; border: none; border-radius: 2rem; font-weight: 700; cursor: pointer; background: #1e4a76; color: white; margin-top: 0.8rem; font-size: 0.9rem; transition: all 0.2s; }
+        .module-btn:hover:not(:disabled) { background: #e67e22; transform: translateY(-2px); }
+        .certificate-btn { background: #f59e0b; color: #1e293b; }
+        .certificate-btn:hover { background: #d97706; }
+
+        /* Progress Section - Clean, no circular indicator */
+        .progress-section { background: white; border-radius: 1.2rem; padding: 1.5rem; margin-top: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .progress-section h3 { font-size: 1.3rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .progress-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .progress-list-item:last-child { border-bottom: none; }
+        .progress-module-title { font-weight: 600; }
+        .progress-status { font-size: 0.85rem; padding: 0.2rem 0.8rem; border-radius: 2rem; }
+        .progress-status.completed { background: #22c55e20; color: #16a34a; }
+        .progress-status.pending { background: #f59e0b20; color: #d97706; }
+        .progress-status.locked { background: #64748b20; color: #475569; }
+
+        /* Accordion Tasks */
+        .task-accordion {
+            background: #f8fafc;
+            border-radius: 1rem;
+            margin: 1.2rem 0;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .task-header {
+            background: #eef2ff;
+            padding: 1rem 1.3rem;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+            border-left: 5px solid #3b82f6;
+        }
+        .task-header:hover { background: #e0e7ff; }
+        .task-header i.fa-chevron-down { transition: transform 0.2s; font-size: 1rem; }
+        .task-header.collapsed i.fa-chevron-down { transform: rotate(-90deg); }
+        .task-body { padding: 1.2rem 1.3rem; border-top: 1px solid #e2e8f0; background: white; }
+        .task-body.hidden { display: none; }
+        
+        .quiz-question { margin: 1rem 0; padding: 0.9rem; background: #fefce8; border-radius: 0.8rem; border-left: 4px solid #f59e0b; }
+        .quiz-question input, .quiz-question textarea { border: 1px solid #cbd5e1; border-radius: 0.6rem; padding: 0.6rem; width: 100%; max-width: 350px; font-family: inherit; margin-top: 0.3rem; }
+        .btn-submit { background: #22c55e; border: none; padding: 0.6rem 1.3rem; border-radius: 2rem; font-weight: 700; cursor: pointer; margin: 0.5rem 0.5rem 0.5rem 0; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-submit:hover { background: #16a34a; transform: translateY(-2px); }
+        .score-badge { background: #1e293b; color: white; padding: 0.3rem 0.8rem; border-radius: 2rem; font-size: 0.75rem; margin-left: 12px; }
+        .review-box { background: #fef3c7; padding: 1rem; border-radius: 1rem; margin-top: 1rem; max-height: 400px; overflow-y: auto; font-size: 0.9rem; }
+        .review-item { padding: 0.6rem; border-bottom: 1px solid #fde68a; }
+        .correct-answer { color: #16a34a; font-weight: 700; }
+        .wrong-answer { color: #dc2626; }
+        
+        .module-content-card { background: white; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .timer-display { background: #1e293b; color: white; padding: 0.5rem 1.2rem; border-radius: 2rem; display: inline-block; margin-bottom: 1.2rem; font-weight: 600; font-size: 0.9rem; }
+        .back-to-dashboard { background: #e2e8f0; border: none; padding: 0.6rem 1.2rem; border-radius: 2rem; cursor: pointer; margin-bottom: 1.2rem; display: inline-flex; align-items: center; gap: 8px; font-weight: 600; transition: all 0.2s; }
+        .back-to-dashboard:hover { background: #cbd5e1; transform: translateX(-3px); }
+        .section-card { background: #f8fafc; padding: 1.2rem; border-radius: 1rem; margin: 1.2rem 0; border-left: 6px solid #1e4a76; font-size: 0.95rem; line-height: 1.5; }
+        .section-card strong { color: #1e4a76; }
+        
+        footer { text-align: center; margin-top: 2.5rem; padding: 1.2rem; color: #64748b; font-size: 0.8rem; border-top: 1px solid #e2e8f0; }
+        
+        @media (max-width: 768px) { 
+            .sidebar { transform: translateX(-100%); position: fixed; width: 280px; }
+            .main-content { margin-left: 0; padding: 1rem; }
+            .page-title { font-size: 1.5rem; }
+            .module-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+        <h1><i class="fas fa-language"></i> E-WIKOM</h1>
+        <p style="margin-bottom: 1.5rem;">Complete Module Certificate System</p>
+        <div id="loginForm">
+            <div class="input-field"><label><i class="fas fa-user"></i> Username</label><input type="text" id="loginUsername" placeholder="Enter your username"></div>
+            <div class="input-field"><label><i class="fas fa-lock"></i> Password</label><input type="password" id="loginPassword" placeholder="Enter your password"></div>
+            <button class="login-btn" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Mag-login</button>
+            <div class="switch-auth"><a id="showRegister">Mag-rehistro</a> | Bagong user?</div>
+            <div id="loginError" class="error-msg"></div>
+        </div>
+        <div id="registerForm" style="display:none;">
+            <div class="input-field"><label><i class="fas fa-user-circle"></i> Buong Pangalan</label><input type="text" id="regFullname" placeholder="Juan Dela Cruz"></div>
+            <div class="input-field"><label><i class="fas fa-user"></i> Username</label><input type="text" id="regUsername" placeholder="piliin ang username"></div>
+            <div class="input-field"><label><i class="fas fa-lock"></i> Password</label><input type="password" id="regPassword" placeholder="password"></div>
+            <button class="login-btn" id="registerBtn"><i class="fas fa-user-plus"></i> Mag-rehistro</button>
+            <div class="switch-auth"><a id="showLogin">Mag-login</a> | May account na?</div>
+            <div id="regError" class="error-msg"></div>
+        </div>
+    </div>
+</div>
+
+<div id="appContainer" class="app-container">
+    <aside class="sidebar">
+        <div class="sidebar-header"><h2><i class="fas fa-language"></i> E-WIKOM</h2><p style="font-size: 0.8rem; opacity: 0.7;">Certificate System</p></div>
+        <div class="user-info-sidebar" id="sidebarUserInfo">
+            <div class="user-avatar" id="sidebarAvatar">S</div>
+            <div class="user-details"><h4 id="sidebarUserName">Mag-aaral</h4><p><i class="fas fa-graduation-cap"></i> Mag-aaral</p></div>
+        </div>
+        <nav class="nav-menu">
+            <div class="nav-item active" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
+            <div class="nav-item" data-page="modules"><i class="fas fa-book-open"></i> Mga Modyul</div>
+            <div class="nav-item" data-page="progress"><i class="fas fa-chart-line"></i> Progress</div>
+            <div class="nav-item logout-sidebar" id="sidebarLogout"><i class="fas fa-sign-out-alt"></i> Logout</div>
+        </nav>
+    </aside>
+    <main class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title" id="pageTitle">Dashboard</h1>
+            <button class="logout-btn-header" id="topLogoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+        <div id="dashboardView">
+            <div class="module-grid" id="moduleGrid"></div>
+            <div class="progress-section">
+                <h3><i class="fas fa-chart-simple"></i> 📈 Iyong Progress</h3>
+                <div id="progressList"></div>
+            </div>
+        </div>
+        <div id="modulesView" style="display:none;"><div class="module-grid" id="modulesGrid"></div></div>
+        <div id="progressView" style="display:none;"><div class="progress-section" style="margin-top:0;"><h3>📋 Detalyadong Progress</h3><div id="detailedProgress"></div></div></div>
+        <div id="moduleContentView" class="module-view"></div>
+        <footer><i class="fas fa-certificate"></i> Kumpletuhin ang lahat ng gawain para makuha ang sertipiko bawat modyul. © E-WIKOM</footer>
+    </main>
+</div>
+
+<script>
+    let currentUser = null;
+    function loadUsers() { return JSON.parse(localStorage.getItem('ewikom_users') || '[]'); }
+    function saveUsers(users) { localStorage.setItem('ewikom_users', JSON.stringify(users)); }
+    function findUser(username) { return loadUsers().find(u => u.username === username); }
+    function updateUser(updated) {
+        let users = loadUsers();
+        const idx = users.findIndex(u => u.username === updated.username);
+        if(idx !== -1) users[idx] = updated;
+        else users.push(updated);
+        saveUsers(users);
+        if(currentUser && currentUser.username === updated.username) currentUser = updated;
+        return updated;
+    }
+
+    let activeModuleTimer = null, moduleStartTime = null, currentOpenModule = null;
+    function startModuleTimer(moduleNum) {
+        if(activeModuleTimer) clearInterval(activeModuleTimer);
+        moduleStartTime = Date.now();
+        activeModuleTimer = setInterval(() => {
+            if(moduleStartTime && currentOpenModule === moduleNum) {
+                const elapsed = Math.floor((Date.now() - moduleStartTime) / 1000);
+                const timerEl = document.getElementById('moduleTimerDisplay');
+                if(timerEl) timerEl.innerText = `⏱️ Oras: ${Math.floor(elapsed/60)}m ${elapsed%60}s`;
+            }
+        }, 1000);
+    }
+    function stopModuleTimer(moduleNum) {
+        if(activeModuleTimer) { clearInterval(activeModuleTimer); activeModuleTimer = null; }
+        if(moduleStartTime && currentUser) {
+            const elapsed = Math.floor((Date.now() - moduleStartTime) / 1000);
+            currentUser.modules[moduleNum].timeSpent = (currentUser.modules[moduleNum].timeSpent || 0) + elapsed;
+            updateUser(currentUser);
+            moduleStartTime = null;
+        }
+    }
+
+    function showDashboard() { hideAllViews(); document.getElementById('dashboardView').style.display = 'block'; renderDashboard(); updateSidebarActive('dashboard'); }
+    function showModules() { hideAllViews(); document.getElementById('modulesView').style.display = 'block'; renderModulesGrid(); updateSidebarActive('modules'); }
+    function showProgress() { hideAllViews(); document.getElementById('progressView').style.display = 'block'; renderProgressDetail(); updateSidebarActive('progress'); }
+    function hideAllViews() {
+        document.getElementById('dashboardView').style.display = 'none';
+        document.getElementById('modulesView').style.display = 'none';
+        document.getElementById('progressView').style.display = 'none';
+        document.getElementById('moduleContentView').style.display = 'none';
+    }
+    function updateSidebarActive(page) {
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+        document.getElementById('pageTitle').innerText = page === 'dashboard' ? 'Dashboard' : (page === 'modules' ? 'Mga Modyul' : 'Progress');
+    }
+
+    function renderDashboard() {
+        const mod1Comp = currentUser.modules[1]?.completed || false;
+        const mod2Comp = currentUser.modules[2]?.completed || false;
+        const modulesArr = [
+            { num:1, title:'Batayang Kaalaman sa Wika', icon:'fa-book-open', desc:'Wikang Pambansa, Bilingguwalismo, Katangian ng Wika' },
+            { num:2, title:'Gamit at Tungkulin ng Wika', icon:'fa-comments', desc:'7 Tungkulin ayon kay Halliday' },
+            { num:3, title:'Barayti ng Wika', icon:'fa-chart-line', desc:'Idyolek, Dayalek, Sosyolek, Rehistro' }
+        ];
+        const grid = document.getElementById('moduleGrid');
+        grid.innerHTML = '';
+        modulesArr.forEach(mod => {
+            const completed = currentUser.modules[mod.num]?.completed;
+            const locked = (mod.num===2 && !mod1Comp) || (mod.num===3 && !mod2Comp);
+            const hasCert = currentUser.modules[mod.num]?.certificateIssued;
+            const card = document.createElement('div');
+            card.className = `module-card ${locked && !completed ? 'locked' : ''}`;
+            card.innerHTML = `
+                <div class="module-header"><h3><i class="fas ${mod.icon}"></i> Modyul ${mod.num}</h3><p>${mod.title}</p></div>
+                <div class="module-body">
+                    <div class="module-status ${completed?'status-completed':(locked?'status-locked':'status-pending')}">${completed?'✓ Tapos na':(locked?'🔒 Naka-lock':'📌 Hindi pa tapos')}</div>
+                    <p>${mod.desc}</p>
+                    <button class="module-btn" onclick="openModule(${mod.num})" ${(locked && !completed) ? 'disabled' : ''}>${locked?'<i class="fas fa-lock"></i> Naka-lock':(completed?'<i class="fas fa-redo"></i> Balikan ang Modyul':'<i class="fas fa-play"></i> Simulan ang Modyul')}</button>
+                    ${completed && !hasCert ? `<button class="module-btn certificate-btn" onclick="generateCert(${mod.num})"><i class="fas fa-certificate"></i> Kunin ang Certificate</button>` : ''}
+                    ${completed && hasCert ? `<div style="margin-top:0.8rem; text-align:center; color:#22c55e;"><i class="fas fa-check-circle"></i> <strong>Certificate nakuha na</strong></div>` : ''}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+        
+        // Clean progress list - no circular indicator
+        const getStatusClass = (completed, locked) => {
+            if(completed) return 'completed';
+            if(locked) return 'locked';
+            return 'pending';
+        };
+        const getStatusText = (completed, locked) => {
+            if(completed) return '✓ Tapos na';
+            if(locked) return '🔒 Naka-lock';
+            return '⏳ Hindi pa tapos';
+        };
+        
+        document.getElementById('progressList').innerHTML = `
+            <div class="progress-list-item">
+                <span class="progress-module-title"><i class="fas fa-book"></i> Modyul 1: Batayang Kaalaman sa Wika</span>
+                <span class="progress-status ${getStatusClass(currentUser.modules[1]?.completed, false)}">${getStatusText(currentUser.modules[1]?.completed, false)} ${currentUser.modules[1]?.certificateIssued ? '🏅' : ''}</span>
+            </div>
+            <div class="progress-list-item">
+                <span class="progress-module-title"><i class="fas fa-comments"></i> Modyul 2: Gamit at Tungkulin ng Wika</span>
+                <span class="progress-status ${getStatusClass(currentUser.modules[2]?.completed, !mod1Comp)}">${getStatusText(currentUser.modules[2]?.completed, !mod1Comp)} ${currentUser.modules[2]?.certificateIssued ? '🏅' : ''}</span>
+            </div>
+            <div class="progress-list-item">
+                <span class="progress-module-title"><i class="fas fa-chart-line"></i> Modyul 3: Barayti ng Wika</span>
+                <span class="progress-status ${getStatusClass(currentUser.modules[3]?.completed, !currentUser.modules[2]?.completed)}">${getStatusText(currentUser.modules[3]?.completed, !currentUser.modules[2]?.completed)} ${currentUser.modules[3]?.certificateIssued ? '🏅' : ''}</span>
+            </div>
+        `;
+    }
+    function renderModulesGrid() { renderDashboard(); }
+    function renderProgressDetail() {
+        const mod1 = currentUser.modules[1] || {};
+        const mod2 = currentUser.modules[2] || {};
+        const mod3 = currentUser.modules[3] || {};
+        document.getElementById('detailedProgress').innerHTML = `
+            <div style="margin:1rem 0; padding:1rem; background:#f8fafc; border-radius:1rem;"><strong>📘 Modyul 1:</strong> ${mod1.completed ? `Tapos noong ${new Date(mod1.completedDate).toLocaleDateString()}` : 'Hindi pa'} | Oras: ${Math.floor((mod1.timeSpent||0)/60)} minuto ${mod1.certificateIssued ? '🏅 Sertipiko nakuha' : ''}</div>
+            <div style="margin:1rem 0; padding:1rem; background:#f8fafc; border-radius:1rem;"><strong>💬 Modyul 2:</strong> ${mod2.completed ? `Tapos noong ${new Date(mod2.completedDate).toLocaleDateString()}` : (currentUser.modules[1]?.completed ? 'Hindi pa' : 'Naka-lock')} | Oras: ${Math.floor((mod2.timeSpent||0)/60)} minuto ${mod2.certificateIssued ? '🏅 Sertipiko nakuha' : ''}</div>
+            <div style="margin:1rem 0; padding:1rem; background:#f8fafc; border-radius:1rem;"><strong>🗣️ Modyul 3:</strong> ${mod3.completed ? `Tapos noong ${new Date(mod3.completedDate).toLocaleDateString()}` : (currentUser.modules[2]?.completed ? 'Hindi pa' : 'Naka-lock')} | Oras: ${Math.floor((mod3.timeSpent||0)/60)} minuto ${mod3.certificateIssued ? '🏅 Sertipiko nakuha' : ''}</div>
+        `;
+    }
+
+    function getVal(id) { return document.getElementById(id)?.value.trim().toLowerCase() || ''; }
+    function computeAndDisplay(taskId, userAnswers, correctAnswers) {
+        let score = 0;
+        const details = [];
+        for(let i=0;i<correctAnswers.length;i++) {
+            const isOk = userAnswers[i] === correctAnswers[i];
+            if(isOk) score++;
+            details.push({user: userAnswers[i] || '(blangko)', correct: correctAnswers[i], ok: isOk});
+        }
+        let html = `<div class="review-box"><strong>📊 Resulta: ${score}/${correctAnswers.length}</strong><br>`;
+        details.forEach((d,idx) => {
+            html += `<div class="review-item">${idx+1}. Iyong sagot: <span class="${d.ok?'correct-answer':'wrong-answer'}">${d.user}</span> → Tamang sagot: <span class="correct-answer">${d.correct}</span></div>`;
+        });
+        html += `</div>`;
+        const resultDiv = document.getElementById(`${taskId}_result`);
+        if(resultDiv) resultDiv.innerHTML = html;
+        const badge = document.getElementById(`${taskId}_badge`);
+        if(badge) badge.innerText = `${score}/${correctAnswers.length}`;
+        return score === correctAnswers.length;
+    }
+
+    window.openModule = function(moduleNum) {
+        const mod1Comp = currentUser.modules[1]?.completed;
+        if(moduleNum===2 && !mod1Comp){ alert('⚠️ Kailangan tapusin ang Modyul 1 muna!'); return; }
+        if(moduleNum===3 && !currentUser.modules[2]?.completed){ alert('⚠️ Kailangan tapusin ang Modyul 2 muna!'); return; }
+        hideAllViews();
+        document.getElementById('moduleContentView').style.display = 'block';
+        startModuleTimer(moduleNum);
+        currentOpenModule = moduleNum;
+        if(moduleNum===1) renderModule1();
+        else if(moduleNum===2) renderModule2();
+        else renderModule3();
+    };
+    window.closeModule = function() { if(currentOpenModule) stopModuleTimer(currentOpenModule); currentOpenModule=null; showDashboard(); };
+    window.generateCert = function(moduleNum) {
+        const titles = {1:'Batayang Kaalaman sa Wika',2:'Gamit at Tungkulin ng Wika',3:'Barayti ng Wika'};
+        const win = window.open('','_blank');
+        win.document.write(`
+            <html><head><title>Certificate M${moduleNum}</title><style>body{font-family:'Times New Roman',serif;padding:40px;text-align:center}.cert{border:15px double #c9a03d;padding:40px;max-width:750px;margin:auto;background:#fffef7;border-radius:20px}</style></head>
+            <body><div class="cert"><h1>📜 Sertipiko ng Pagkatapos</h1><h2>${currentUser.fullname.toUpperCase()}</h2><p>ay matagumpay na natapos ang</p><h3>Modyul ${moduleNum}: ${titles[moduleNum]}</h3><p>Petsa: ${new Date().toLocaleDateString()}</p><hr><p>E-WIKOM Education System</p></div><script>window.onload=()=>{window.print();setTimeout(()=>window.close(),800)}<\/script></body></html>
+        `);
+        win.document.close();
+        currentUser.modules[moduleNum].certificateIssued = true;
+        updateUser(currentUser);
+        renderDashboard();
+    };
+
+    // Module 1
+    function renderModule1() {
+        const html = `
+            <button class="back-to-dashboard" onclick="closeModule()"><i class="fas fa-arrow-left"></i> Bumalik sa Dashboard</button>
+            <div class="module-content-card">
+                <div class="timer-display" id="moduleTimerDisplay">⏱️ Oras: 0m 0s</div>
+                <div class="section-card"><strong>🎯 Learning Competency:</strong> Naiuugnay ang mga konseptong pangwika sa iba't ibang sitwasyong pangkomunikasyon batay sa sariling kaalaman, pananaw, at mga karanasan.</div>
+                <div class="section-card"><strong>📖 Maikling Panimula:</strong> Ang modyul na ito ay naglalayong palawakin ang kaalaman tungkol sa wikang pambansa (Filipino), wikang panturo, wikang opisyal, bilingguwalismo, at multilingguwalismo.</div>
+                <div class="section-card"><strong>📚 Talakayan:</strong> Wikang Pambansa: Filipino. Wikang Panturo: Midyum ng pagtuturo. Wikang Opisyal: Pamahalaan. Bilingguwalismo: Dalawang wika. Multilingguwalismo: Higit sa dalawa. Katangian: Arbitraryo, Dinamiko, Malikhain, Sistematik, Panlipunan.</div>
+                <div class="task-accordion"><div class="task-header" onclick="toggleTask(this)"><span><i class="fas fa-puzzle-piece"></i> GAWAIN 1: Pagkilala sa Katangian <span id="task1_badge" class="score-badge">0/5</span></span><i class="fas fa-chevron-down"></i></div>
+                <div class="task-body hidden">
+                    <div class="quiz-question">1. Pag-usbong ng salitang "awit" bilang ekspresyon ng lungkot → <input type="text" id="g1_1" placeholder="Katangian"></div>
+                    <div class="quiz-question">2. Pagkakaiba ng tawag sa "tubig" sa iba't ibang lugar → <input type="text" id="g1_2" placeholder="Katangian"></div>
+                    <div class="quiz-question">3. Paglikha ng bagong salita sa social media → <input type="text" id="g1_3" placeholder="Katangian"></div>
+                    <div class="quiz-question">4. Pagsunod sa wastong gramatika → <input type="text" id="g1_4" placeholder="Katangian"></div>
+                    <div class="quiz-question">5. Pakikipag-usap sa kapwa tao → <input type="text" id="g1_5" placeholder="Katangian"></div>
+                    <button class="btn-submit" onclick="checkGawain1()">Tsek ang Gawain</button>
+                    <div id="task1_result"></div>
+                </div></div>
+                <div class="task-accordion"><div class="task-header" onclick="toggleTask(this)"><span><i class="fas fa-clipboard-list"></i> PRE-TEST <span id="pretest_badge" class="score-badge">0/5</span></span><i class="fas fa-chevron-down"></i></div>
+                <div class="task-body hidden">
+                    <div class="quiz-question">1. Ano ang wikang pambansa ng Pilipinas? <input type="text" id="pre1" placeholder="Sagot"></div>
+                    <div class="quiz-question">2. Wikang ginagamit sa pagtuturo? <input type="text" id="pre2" placeholder="Sagot"></div>
+                    <div class="quiz-question">3. Wikang ginagamit sa pamahalaan? <input type="text" id="pre3" placeholder="Sagot"></div>
+                    <div class="quiz-question">4. Paggamit ng dalawang wika? <input type="text" id="pre4" placeholder="Sagot"></div>
+                    <div class="quiz-question">5. Paggamit ng higit sa dalawang wika? <input type="text" id="pre5" placeholder="Sagot"></div>
+                    <button class="btn-submit" onclick="checkPretest()">I-submit</button>
+                    <div id="pretest_result"></div>
+                </div></div>
+                <div class="task-accordion"><div class="task-header" onclick="toggleTask(this)"><span><i class="fas fa-flag-checkered"></i> POST-TEST (Para makumpleto)</span><i class="fas fa-chevron-down"></i></div>
+                <div class="task-body hidden">
+                    <div class="quiz-question">1. Ang wika ay ginagamit upang: <input type="text" id="post1" placeholder="Sagot (makipagkomunikasyon)"></div>
+                    <div class="quiz-question">2. Ang patuloy na pagbabago ng wika ay nagpapakita na ito ay: <input type="text" id="post2" placeholder="Sagot (dinamiko)"></div>
+                    <div class="quiz-question">3. Ang pagbuo ng bagong salita ay nagpapakita ng: <input type="text" id="post3" placeholder="Sagot (malikhain)"></div>
+                    <div class="quiz-question">4. Ang wika ay mahalaga dahil ito ay: <input type="text" id="post4" placeholder="Sagot (nagdudulot ng pagkakaunawaan)"></div>
+                    <div class="quiz-question">5. Ang pagkakaroon ng tuntunin sa paggamit ng wika ay nagpapakita na ito ay: <input type="text" id="post5" placeholder="Sagot (sistematik)"></div>
+                    <button class="btn-submit" onclick="completeModule1()">Tapusin ang Modyul 1</button>
+                    <div id="posttest_result"></div>
+                </div></div>
+            </div>
+        `;
+        document.getElementById('moduleContentView').innerHTML = html;
+    }
+    window.checkGawain1 = () => computeAndDisplay('task1', [getVal('g1_1'),getVal('g1_2'),getVal('g1_3'),getVal('g1_4'),getVal('g1_5')], ['dinamiko','arbitraryo','malikhain','sistematik','panlipunan']);
+    window.checkPretest = () => computeAndDisplay('pretest', [getVal('pre1'),getVal('pre2'),getVal('pre3'),getVal('pre4'),getVal('pre5')], ['filipino','wikang panturo','wikang opisyal','bilingguwalismo','multilingguwalismo']);
+    window.completeModule1 = function() {
+        const correct = ['makipagkomunikasyon','dinamiko','malikhain','nagdudulot ng pagkakaunawaan','sistematik'];
+        const answers = [getVal('post1'),getVal('post2'),getVal('post3'),getVal('post4'),getVal('post5')];
+        let allCorrect = answers.every((a,i)=> a === correct[i]);
+        if(allCorrect) {
+            stopModuleTimer(1); currentUser.modules[1].completed = true; currentUser.modules[1].completedDate = new Date().toISOString(); updateUser(currentUser);
+            document.getElementById('posttest_result').innerHTML = `<div class="review-box" style="color:green;">🎉 Tapos na Modyul 1! <button class="btn-submit" onclick="generateCert(1)">Kunin Certificate</button> <button class="btn-submit" onclick="closeModule()">Bumalik</button></div>`;
+        } else { document.getElementById('posttest_result').innerHTML = `<div class="review-box" style="color:red;">Kailangan 5/5. Tamang sagot: makipagkomunikasyon, dinamiko, malikhain, nagdudulot ng pagkakaunawaan, sistematik</div>`; }
+    };
+
+    // Module 2
+    function renderModule2() {
+        const html = `<button class="back-to-dashboard" onclick="closeModule()">← Bumalik</button><div class="module-content-card"><div class="timer-display" id="moduleTimerDisplay"></div>
+        <div class="section-card"><strong>🎯 7 Tungkulin ng Wika (Halliday):</strong> Interaksiyonal, Instrumental, Regulatoryo, Heyuristiko, Impormatibo, Personal, Imahinatibo</div>
+        <div class="task-accordion"><div class="task-header" onclick="toggleTask(this)"><span><i class="fas fa-puzzle-piece"></i> GAWAIN: Tukuyin ang Tungkulin <span id="task2_badge" class="score-badge">0/7</span></span><i class="fas fa-chevron-down"></i></div>
+        <div class="task-body hidden">
+            <div class="quiz-question">1. "Magandang araw! Kumusta ka?" → <input type="text" id="f1" placeholder="Tungkulin"></div>
+            <div class="quiz-question">2. "Pakiabot naman ng tubig" → <input type="text" id="f2" placeholder="Tungkulin"></div>
+            <div class="quiz-question">3. "Bawal pumasok dito!" → <input type="text" id="f3" placeholder="Tungkulin"></div>
+            <div class="quiz-question">4. "Bakit umuulan ngayon?" → <input type="text" id="f4" placeholder="Tungkulin"></div>
+            <div class="quiz-question">5. Pag-uulat sa klase (pagbibigay balita) → <input type="text" id="f5" placeholder="Tungkulin"></div>
+            <div class="quiz-question">6. "Masaya ako sa aking nakamit" → <input type="text" id="f6" placeholder="Tungkulin"></div>
+            <div class="quiz-question">7. Pagsulat ng tula o hugot lines → <input type="text" id="f7" placeholder="Tungkulin"></div>
+            <button class="btn-submit" onclick="checkTungkulin()">Tsek</button><div id="task2_result"></div>
+        </div></div>
+        <div class="task-accordion"><div class="task-header" onclick="toggleTask(this)"><span><i class="fas fa-flag-checkered"></i> Kumpletuhin ang Modyul 2</span><i class="fas fa-chevron-down"></i></div>
+        <div class="task-body hidden"><button class="btn-submit" onclick="completeModule2()">Kumpirmahin</button><div id="mod2CompleteMsg"></div></div></div></div>`;
+        document.getElementById('moduleContentView').innerHTML = html;
+    }
+    window.checkTungkulin = () => { const perfect = computeAndDisplay('task2', [getVal('f1'),getVal('f2'),getVal('f3'),getVal('f4'),getVal('f5'),getVal('f6'),getVal('f7')], ['interaksiyonal','instrumental','regulatoryo','heyuristiko','impormatibo','personal','imahinatibo']); window.mod2Ready = perfect; };
+    window.completeModule2 = function() { if(window.mod2Ready) { stopModuleTimer(2); currentUser.modules[2].completed=true; currentUser.modules[2].completedDate=new Date().toISOString(); updateUser(currentUser); document.getElementById('mod2CompleteMsg').innerHTML=`<div class="review-box" style="color:green;">✅ Tapos na Modyul 2! <button class="btn-submit" onclick="generateCert(2)">Kunin Certificate</button> <button class="btn-submit" onclick="closeModule()">Bumalik</button></div>`; } else { document.getElementById('mod2CompleteMsg').innerHTML='<div class="review-box" style="color:red;">Kailangan 7/7 muna.</div>'; } };
+
+    // Module 3
+    function renderModule3() {
+        const html = `<button class="back-to-dashboard" onclick="closeModule()">← Bumalik</button><div class="module-content-card"><div class="timer-display" id="moduleTimerDisplay"></div>
+        <div class="section-card"><strong>Barayti ng Wika:</strong> Idyolek (personal), Dayalek (rehiyon), Sosyolek (grupo), Rehistro (propesyon)</div>
+        <div class="task-accordion"><div class="task-header" onclick="toggleTask(this)"><span><i class="fas fa-puzzle-piece"></i> GAWAIN: Tukuyin ang Barayti <span id="task3_badge" class="score-badge">0/5</span></span><i class="fas fa-chevron-down"></i></div>
+        <div class="task-body hidden">
+            <div class="quiz-question">1. "Petmalu" → <input type="text" id="b1" placeholder="Barayti"></div>
+            <div class="quiz-question">2. "Balay" (sa Visayas) → <input type="text" id="b2" placeholder="Barayti"></div>
+            <div class="quiz-question">3. Sariling ekspresyon tulad ng "lods" → <input type="text" id="b3" placeholder="Barayti"></div>
+            <div class="quiz-question">4. "Diagnosis" na ginagamit ng doktor → <input type="text" id="b4" placeholder="Barayti"></div>
+            <div class="quiz-question">5. Slang ng kabataan → <input type="text" id="b5" placeholder="Barayti"></div>
+            <button class="btn-submit" onclick="checkBarayti()">Tsek</button><div id="task3_result"></div>
+        </div></div>
+        <div class="task-accordion"><div class="task-header" onclick="toggleTask(this)"><span><i class="fas fa-flag-checkered"></i> Kumpletuhin ang Modyul 3</span><i class="fas fa-chevron-down"></i></div>
+        <div class="task-body hidden"><button class="btn-submit" onclick="completeModule3()">Kumpirmahin</button><div id="mod3CompleteMsg"></div></div></div></div>`;
+        document.getElementById('moduleContentView').innerHTML = html;
+    }
+    window.checkBarayti = () => { const perfect = computeAndDisplay('task3', [getVal('b1'),getVal('b2'),getVal('b3'),getVal('b4'),getVal('b5')], ['sosyolek','dayalek','idyolek','rehistro','sosyolek']); window.mod3Ready = perfect; };
+    window.completeModule3 = function() { if(window.mod3Ready) { stopModuleTimer(3); currentUser.modules[3].completed=true; currentUser.modules[3].completedDate=new Date().toISOString(); updateUser(currentUser); document.getElementById('mod3CompleteMsg').innerHTML=`<div class="review-box" style="color:green;">✅ Tapos na Modyul 3! <button class="btn-submit" onclick="generateCert(3)">Kunin Certificate</button> <button class="btn-submit" onclick="closeModule()">Bumalik</button></div>`; } else { document.getElementById('mod3CompleteMsg').innerHTML='<div class="review-box" style="color:red;">Kailangan 5/5 muna.</div>'; } };
+
+    window.toggleTask = function(header) { const body = header.nextElementSibling; const hidden = body.classList.contains('hidden'); if(hidden) { body.classList.remove('hidden'); header.classList.remove('collapsed'); } else { body.classList.add('hidden'); header.classList.add('collapsed'); } };
+
+    // Authentication
+    document.getElementById('registerBtn')?.addEventListener('click',()=>{
+        const fullname = document.getElementById('regFullname').value.trim(), username = document.getElementById('regUsername').value.trim(), password = document.getElementById('regPassword').value;
+        if(!fullname||!username||!password){ document.getElementById('regError').innerText='Punan lahat.'; return;}
+        let users=loadUsers();
+        if(users.find(u=>u.username===username)){ document.getElementById('regError').innerText='Username exists.'; return;}
+        users.push({username,password,fullname,modules:{1:{completed:false,timeSpent:0,certificateIssued:false,completedDate:null},2:{},3:{}}});
+        saveUsers(users); alert('Rehistro matagumpay!'); document.getElementById('showLogin').click();
+    });
+    document.getElementById('loginBtn')?.addEventListener('click',()=>{
+        const user = findUser(document.getElementById('loginUsername').value.trim());
+        if(!user || user.password !== document.getElementById('loginPassword').value){ document.getElementById('loginError').innerText='Invalid.'; return;}
+        currentUser = JSON.parse(JSON.stringify(user)); if(!currentUser.modules[1]) currentUser.modules={1:{},2:{},3:{}};
+        document.getElementById('loginOverlay').style.display='none'; document.getElementById('appContainer').style.display='flex';
+        document.getElementById('sidebarUserName').innerText = currentUser.fullname.split(' ')[0];
+        document.getElementById('sidebarAvatar').innerText = currentUser.fullname.charAt(0).toUpperCase();
+        showDashboard();
+    });
+    function logout() { if(activeModuleTimer) clearInterval(activeModuleTimer); currentUser=null; document.getElementById('loginOverlay').style.display='flex'; document.getElementById('appContainer').style.display='none'; }
+    document.getElementById('sidebarLogout')?.addEventListener('click',logout);
+    document.getElementById('topLogoutBtn')?.addEventListener('click',logout);
+    document.getElementById('showRegister')?.addEventListener('click',()=>{ document.getElementById('loginForm').style.display='none'; document.getElementById('registerForm').style.display='block'; });
+    document.getElementById('showLogin')?.addEventListener('click',()=>{ document.getElementById('loginForm').style.display='block'; document.getElementById('registerForm').style.display='none'; });
+    document.querySelectorAll('.nav-item[data-page]').forEach(btn=>{ btn.addEventListener('click',()=>{ if(btn.dataset.page==='dashboard')showDashboard(); else if(btn.dataset.page==='modules')showModules(); else if(btn.dataset.page==='progress')showProgress(); }); });
+</script>
+</body>
+</html>
